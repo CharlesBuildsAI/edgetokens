@@ -48,8 +48,12 @@ python3 scripts/build_site.py
 ## Checks
 
 ```bash
+python3 -m unittest discover -s tests -v
+node --check scripts/app.js
 python3 scripts/check_links.py
 ```
+
+The offline unit tests cover generated internal links, copied datasets, provenance labels, run details, and truthful submission copy. Optional browser smoke tests: `uv run --no-project --with playwright python tests/browser_smoke.py` (requires a Playwright Chromium install). They serve `site/` on an ephemeral localhost port, test filters, URL state, sorting, mobile layout, and the affiliate-event hook. Screenshots go to ignored `preview/`.
 
 That checks affiliate-link shape, that every accessory in `scripts/accessories.py` is linked, that the kit and guide pages are in the nav and sitemap, and that each unique Seeed shop URL returns HTTP 200. It does not crawl the open web.
 
@@ -66,12 +70,18 @@ These are public link parameters in the generated HTML, kept on purpose. They ar
 
 Some boards have no verified Amazon product page, so the generator emits a tagged Amazon search URL instead of an `/dp/ASIN` link. Amazon prices are never printed. Accessory prices come from Seeed Studio, Samsung, and Arace Tech, with the source URL and the date 2026-10-17.
 
+## Affiliate click integration
+
+`assets/app.js` dispatches the first-party DOM event `edgetokens:affiliate-click` when a tagged shop link is clicked. Its detail contains `merchant` (hostname), `slot` (the existing placement identifier), and `page` (pathname only). It does not include query strings, emails, account IDs, or user identifiers. It does not prevent navigation.
+
+No analytics collector is configured: the event is only an integration hook and does not persist counts, report commissions, or measure sales. Connect a privacy-reviewed analytics collector after identifying the site hosting/analytics account; use affiliate dashboards to reconcile confirmed earnings. Public tracking parameters alone do not establish who owns or receives payouts for those affiliate accounts.
+
 ## Still open
 
 The old README listed `NEWSLETTER_PROVIDER_PLACEHOLDER`, `SUBMIT_BACKEND_PLACEHOLDER`, and empty affiliate slots. Those strings are not in this tree. What is actually still unfinished:
 
 - **Newsletter.** The footer form posts to Buttondown's public embed endpoint `https://buttondown.com/api/emails/embed-subscribe/edgetokens`. There is no API key in the repo. This import does not create or verify that Buttondown account.
-- **Submissions.** `/submit/` does not post to a backend. It opens a prefilled GitHub issue on `CharlesBuildsAI/edgetokens`. The confirmation text says to email "the newsletter address" if you have no GitHub account, and no address is configured.
+- **Submissions.** `/submit/` does not post to a backend. It opens a prefilled GitHub issue on `CharlesBuildsAI/edgetokens`. Submission requires a GitHub account. The form now warns that all details, including an optional contact email, go into a public issue. No private submission channel is configured.
 - **Prices.** These seven board rows have no verified price: M5Stack AI Pyramid, M5Stack LLM8850, Jetson Orin NX 8GB, Jetson Orin NX 8GB Super, Jetson Orin NX 16GB, Jetson Orin NX 16GB Super, and Arduino UNO Q 4GB.
 - **Screenshots.** `screenshot-home.png`, `screenshot-board-rpi5.png`, and `screenshot-can-rpi5-llama.png` show the earlier 233-run pages (the hero says 233 measured runs). `site/index.html` is the 242-run build.
 - **License.** There is no `LICENSE` file in this repository.

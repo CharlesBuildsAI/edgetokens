@@ -20,19 +20,19 @@ $$('table.lb').forEach(function(t){$$('th',t).forEach(function(th,i){function go
   return(va>vb?1:va<vb?-1:0)*(asc?1:-1)}).forEach(function(r){b.appendChild(r)});t.dispatchEvent(new Event('sorted'))}
   th.addEventListener('click',go);th.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})})});
 // leaderboard filters (+ show the top 25 until expanded or filtered)
-var q=$('#q');if(q){var t=$('table.lb'),cnt=$('#count'),fb=$('#f-board'),fs=$('#f-size'),fr=$('#f-rt'),more=$('#showall'),LIM=25,all=false,tot=t.tBodies[0].rows.length;
-  var apply=function(){var w=q.value.toLowerCase().split(/\s+/).filter(Boolean),n=0,filtered=!!(w.length||fb.value||fs.value||fr.value);
+var q=$('#q');if(q){var t=$('table.lb'),cnt=$('#count'),fb=$('#f-board'),fs=$('#f-size'),fr=$('#f-rt'),fm=$('#f-model'),fe=$('#f-source'),more=$('#showall'),LIM=25,all=false,tot=t.tBodies[0].rows.length;
+  var apply=function(){var w=q.value.toLowerCase().split(/\s+/).filter(Boolean),n=0,filtered=!!(w.length||fb.value||fs.value||fr.value||fm.value||fe.value);
     Array.prototype.slice.call(t.tBodies[0].rows).forEach(function(r){var x=r.textContent.toLowerCase();
-    var ok=w.every(function(s){return x.indexOf(s)>=0})&&(!fb.value||r.dataset.board===fb.value)&&(!fs.value||r.dataset.size===fs.value)&&(!fr.value||r.dataset.rt===fr.value);
+    var ok=w.every(function(s){return x.indexOf(s)>=0})&&(!fb.value||r.dataset.board===fb.value)&&(!fs.value||r.dataset.size===fs.value)&&(!fr.value||r.dataset.rt===fr.value)&&(!fm.value||r.dataset.model===fm.value)&&(!fe.value||r.dataset.source===fe.value);
     if(ok)n++;r.hidden=!ok||(!all&&!filtered&&n>LIM)});
     cnt.textContent=n===tot?tot+' runs':n+' of '+tot+' runs';
     if(more){more.hidden=all||filtered||n<=LIM;more.textContent='Show all '+n+' runs'}
-    var u=new URLSearchParams();if(q.value)u.set('q',q.value);if(fb.value)u.set('board',fb.value);if(fs.value)u.set('size',fs.value);if(fr.value)u.set('rt',fr.value);
+    var u=new URLSearchParams();if(q.value)u.set('q',q.value);if(fb.value)u.set('board',fb.value);if(fs.value)u.set('size',fs.value);if(fr.value)u.set('rt',fr.value);if(fm.value)u.set('model',fm.value);if(fe.value)u.set('source',fe.value);
     history.replaceState(null,'',location.pathname+(u.toString()?'?'+u:'')+location.hash)};
-  var p=new URLSearchParams(location.search);q.value=p.get('q')||'';fb.value=p.get('board')||'';fs.value=p.get('size')||'';fr.value=p.get('rt')||'';
-  q.addEventListener('input',apply);[fb,fs,fr].forEach(function(s){s.addEventListener('change',apply)});t.addEventListener('sorted',apply);
+  var p=new URLSearchParams(location.search);q.value=p.get('q')||'';fb.value=p.get('board')||'';fs.value=p.get('size')||'';fr.value=p.get('rt')||'';fm.value=p.get('model')||'';fe.value=p.get('source')||'';
+  q.addEventListener('input',apply);[fb,fs,fr,fm,fe].forEach(function(s){s.addEventListener('change',apply)});t.addEventListener('sorted',apply);
   if(more)more.onclick=function(){all=true;apply()};
-  $('#clear').onclick=function(){q.value=fb.value=fs.value=fr.value='';apply()};apply();t.classList.add('ready')}
+  $('#clear').onclick=function(){q.value=fb.value=fs.value=fr.value=fm.value=fe.value='';apply()};apply();t.classList.add('ready')}
 // value tabs (segmented control, arrow keys move between tabs)
 var tabs=$$('[data-tab]');if(tabs.length){var show=function(id){tabs.forEach(function(b){var on=b.dataset.tab===id;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;var p=d.getElementById(b.dataset.tab);if(p)p.hidden=!on})};
   tabs.forEach(function(b,i){b.onclick=function(){show(b.dataset.tab);history.replaceState(null,'','#'+b.dataset.tab)};
@@ -58,6 +58,12 @@ var pd=$('#pick-data');if(pd){var D=JSON.parse(pd.textContent),out=$('#pk-out'),
     out.appendChild(wrap)};
   var seg=function(id,key,parse){$$('#'+id+' .seg').forEach(function(b){b.onclick=function(){$$('#'+id+' .seg').forEach(function(x){x.setAttribute('aria-pressed',x===b)});st[key]=parse(b.dataset[key]);render()}})};
   seg('pk-budget','budget',function(v){return +v});seg('pk-size','size',function(v){return v});render()}
+// First-party analytics hook only: no collector, cookies, identifiers or network requests.
+// A deployed analytics integration can subscribe to this event; it does not measure sales.
+d.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-aff-slot]');if(!a)return;
+  var u=new URL(a.href,location.href),detail={merchant:u.hostname,slot:a.dataset.affSlot,page:location.pathname};
+  d.dispatchEvent(new CustomEvent('edgetokens:affiliate-click',{detail:detail}));
+});
 // submit form prefill
 var f=$('#submit-form');if(f){var sp=new URLSearchParams(location.search);if(sp.get('board'))f.board.value=sp.get('board');if(sp.get('model'))f.model.value=sp.get('model')}
 })();

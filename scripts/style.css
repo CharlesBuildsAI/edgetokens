@@ -356,3 +356,10 @@ details.callout[open] summary{margin-bottom:10px}details.callout[open] summary:a
 table.guide-t td a{font-variant-numeric:tabular-nums}
 @media (max-width:900px){.kit-cards{grid-template-columns:1fr}}
 @media (max-width:640px){.kit-card{padding:26px 22px}.ktotal{padding:22px}.klist .buy{width:100%}.kspd{min-width:84px}}
+
+/* Provenance stays alongside each source, including on narrow screens. */
+.evidence-label{display:block;font-size:12px;font-weight:600;color:var(--mute);margin-bottom:4px}
+.run-details{font-size:12px;min-width:150px;max-width:320px;white-space:normal;margin-top:8px}
+.run-details summary{cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.run-details p{line-height:1.5;margin:8px 0;overflow-wrap:anywhere}
+@media (max-width:640px){.filters .f-source,.filters #clear{grid-column:1/-1}}
