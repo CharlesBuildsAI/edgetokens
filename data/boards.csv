@@ -1,0 +1,24 @@
+platform,board_name,chip,memory,price,currency,price_note,price_source_url,price_date
+rpi5,Raspberry Pi 5 8GB,Broadcom BCM2712,8GB LPDDR4X,175,USD,official list price after Apr 2026 increase,https://www.cnx-software.com/2026/04/01/raspberry-pi-4-3gb-launched-for-83-75-further-price-increases-announced-across-the-board-for-4gb-ram-hardware/,2026-04-01
+rpi5,Raspberry Pi 5 16GB,Broadcom BCM2712,16GB LPDDR4X,305,USD,official list price after Apr 2026 increase,https://www.cnx-software.com/2026/04/01/raspberry-pi-4-3gb-launched-for-83-75-further-price-increases-announced-across-the-board-for-4gb-ram-hardware/,2026-04-01
+rpi5-ai-hat-plus-2,"Raspberry Pi AI HAT+ 2 (add-on, needs a Pi 5)",Hailo-10H,8GB on HAT,180,USD,official list price after Apr 2026 increase (launched at $130),https://www.cnx-software.com/2026/04/01/raspberry-pi-4-3gb-launched-for-83-75-further-price-increases-announced-across-the-board-for-4gb-ram-hardware/,2026-04-01
+rpi5-ai-hat-plus-2,Raspberry Pi 5 + AI HAT+ 2 (as tested in paper),BCM2712 + Hailo-10H,8GB + 8GB,451.83,USD,price quoted in arXiv paper,https://arxiv.org/abs/2604.24785,2026-04-24
+rpi5-cluster,Raspberry Pi 5 8GB (per node),Broadcom BCM2712,8GB LPDDR4X,175,USD,multiply by node count,https://www.cnx-software.com/2026/04/01/raspberry-pi-4-3gb-launched-for-83-75-further-price-increases-announced-across-the-board-for-4gb-ram-hardware/,2026-04-01
+jetson-orin-nano-super,Jetson Orin Nano Super Developer Kit,Orin (Ampere GPU),8GB LPDDR5,399,USD,raised from $249 (July 2026 report),https://hwbusters.com/news/nvidia-jetson-prices-jump-up-to-101-the-249-orin-nano-super-is-now-399/,2026-07-21
+jetson-orin-nano,"Jetson Orin Nano Developer Kit (same hardware, original power mode)",Orin (Ampere GPU),8GB LPDDR5,399,USD,same dev kit as Super; Super mode is a JetPack 6.2 flash,https://hwbusters.com/news/nvidia-jetson-prices-jump-up-to-101-the-249-orin-nano-super-is-now-399/,2026-07-21
+jetson-agx-orin,Jetson AGX Orin Developer Kit,Orin (Ampere GPU),64GB,3499,USD,"raised from $1,999",https://hwbusters.com/news/nvidia-jetson-prices-jump-up-to-101-the-249-orin-nano-super-is-now-399/,2026-07-21
+jetson-agx-thor,Jetson AGX Thor Developer Kit,Thor (Blackwell GPU),128GB,5499,USD,"raised from $3,499",https://hwbusters.com/news/nvidia-jetson-prices-jump-up-to-101-the-249-orin-nano-super-is-now-399/,2026-07-21
+rk3588,Radxa ROCK 5B 8GB,RK3588,8GB,160,USD,listed price,https://sbc.compare/radxa,2026-10-17
+rk3588,Radxa ROCK 5B+ 16GB,RK3588,16GB,135,USD,listed price,https://sbc.compare/radxa,2026-10-17
+rk3588,"Indiedroid Nova + heatsink, fan, eMMC",RK3588S,16GB,199.95,USD,sale price,https://ameridroid.com/collections/single-board-computer,2026-10-17
+rk3588,"ODROID-M2 w/ case, 64GB eMMC",RK3588S2,from 8GB,299.95,USD,"""from"" price",https://ameridroid.com/collections/single-board-computer,2026-10-17
+rk3576,Radxa ROCK 4D 8GB,RK3576,8GB,106,USD,listed price,https://sbc.compare/radxa,2026-10-17
+m5stack-module-llm,M5Stack LLM Module Kit (AX630C),AX630C,4GB,79.9,USD,regular price; out of stock when checked,https://shop.m5stack.com/products/m5stack-llm-large-language-model-module-kit-ax630c,2026-10-17
+m5stack-module-llm,M5Stack Module LLM (as tested in paper),AX630C,4GB,99.9,USD,price quoted in arXiv paper,https://arxiv.org/abs/2604.24785,2026-04-24
+m5stack-ai-pyramid,M5Stack AI Pyramid (AX8850),AX8850,,,USD,price not verified,,
+m5stack-llm8850,M5Stack LLM8850 M.2 card (AX8850),AX8850,,,USD,price not verified,,
+jetson-orin-nx-8gb,Jetson Orin NX 8GB module,Orin (Ampere GPU),8GB,,USD,price not verified,,
+jetson-orin-nx-8gb-super,Jetson Orin NX 8GB module (Super mode),Orin (Ampere GPU),8GB,,USD,price not verified,,
+jetson-orin-nx-16gb,Jetson Orin NX 16GB module,Orin (Ampere GPU),16GB,,USD,price not verified,,
+jetson-orin-nx-16gb-super,Jetson Orin NX 16GB module (Super mode),Orin (Ampere GPU),16GB,,USD,price not verified,,
+arduino-uno-q,Arduino UNO Q 4GB,Qualcomm QRB2210,4GB,,USD,price not verified,,

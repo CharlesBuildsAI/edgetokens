@@ -1,0 +1,35 @@
+# Secrets and local environment. Never commit these.
+.env
+.env.*
+*.pem
+*.key
+id_rsa
+id_ed25519
+credentials.json
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local inputs and QA captures. /raw is a third-party snapshot used only to
+# regenerate the Rockchip rows (see README). /preview is where the Playwright
+# scripts write screenshots. Anchored so tools/preview/*.py stays tracked.
+# The three screenshot-*.png files at the repo root are published on purpose.
+/raw/
+/preview/
+*.bak
+*.bak*
+
+# Old packaging leftovers
+edgetokens-site.zip
+*.log
+
+# Editor, OS, and hosting tooling this repo does not use
+.DS_Store
+.idea/
+.vscode/
+.wrangler/
+node_modules/
