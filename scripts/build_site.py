@@ -75,12 +75,15 @@ def page(title, desc, body, path, depth, active=''):
 <main id="main" class="wrap">{body}</main>
 <section class="news reveal" aria-labelledby="nl-h"><div class="wrap narrow"><h2 id="nl-h">Stay in the loop.</h2><p>New boards, new runtimes, new numbers. One email a month, no hype.</p>
 <form class="nl" action="https://buttondown.com/api/emails/embed-subscribe/edgetokens" method="post" target="_blank" onsubmit="this.querySelector('.ok').hidden=false;">
-<input type="email" name="email" required placeholder="you@workbench.dev" aria-label="Email"><input type="hidden" name="embed" value="1"><button>Subscribe</button><span class="ok" hidden>Almost done! Check your inbox to confirm.</span></form></div></section>
+<input type="email" name="email" required placeholder="you@workbench.dev" aria-label="Email"><input type="hidden" name="embed" value="1"><button>Subscribe</button><span class="ok" hidden>Continue in the new tab. If the provider accepts your request, follow its confirmation instructions.</span></form></div></section>
 <footer class="foot"><div class="wrap">
 <nav class="footnav" aria-label="Footer"><a href="{pre}index.html">Leaderboard</a><a href="{pre}value/index.html">Best value</a><a href="{pre}pick/index.html">Which board?</a><a href="{pre}kits/index.html">Starter kits</a><a href="{pre}guides/best-board-for-local-llm/index.html">Best board for local LLMs</a><a href="{pre}guides/raspberry-pi-5-local-llm-setup/index.html">Pi 5 local LLM setup</a><a href="{pre}guides/jetson-orin-nano-super-local-llm/index.html">Jetson Orin Nano Super guide</a><a href="{pre}boards/index.html">Boards</a><a href="{pre}submit/index.html">Submit a run</a><a href="{pre}about/index.html">Methodology</a><a href="{pre}data/benchmarks.csv" download>Download the dataset (CSV)</a></nav>
 <p class="disc">Every number links to its public source. We never estimate speeds. As an Amazon Associate, EdgeTokens earns from qualifying purchases. EdgeTokens may also earn a commission from Seeed Studio purchases made through our links. <a href="{pre}about/index.html">Methodology</a> · <a href="{pre}data/benchmarks.csv" download>Download the dataset (CSV)</a></p>
 <p class="colophon">EdgeTokens · Real LLM speeds on small boards. Every number sourced.</p></div></footer>
 <script src="{pre}assets/app.js"></script></body></html>'''
+
+SOURCE_LABELS = {'vendor': 'Vendor reported', 'academic': 'Academic paper', 'independent': 'Independent publication', 'community': 'Community reported'}
+def source_label(r): return SOURCE_LABELS.get(r['source_type'], 'Source type not classified')
 
 def src_link(r, pre):
     return f'<a class="src" href="{esc(r["source_url"])}" rel="nofollow noopener" target="_blank" title="{esc(r["source_name"])}, {esc(r["source_date"])} ({esc(r["date_type"])})">source ↗</a>'
@@ -198,14 +201,14 @@ def table(rows, pre, show_board=True, show_model=True, limit=False):
     h.append('</tr></thead><tbody>')
     for r in rows:
         w = max(2, round(100*(r['gen_tps']/mx)**0.5))
-        h.append(f'<tr data-board="{esc(r["platform"])}" data-size="{r["size"]}" data-rt="{esc(r["rtf"])}">')
+        h.append(f'<tr data-source="{esc(r["source_type"])}" data-model="{esc(r["model_slug"])}" data-board="{esc(r["platform"])}" data-size="{r["size"]}" data-rt="{esc(r["rtf"])}">')
         if show_board: h.append(f'<td class="c-board" data-label="Board"><a href="{pre}boards/{r["platform"]}/index.html">{esc(SHORT[r["platform"]])}</a>{sub_board(r)}</td>')
         if show_model: h.append(f'<td class="c-model" data-label="Model"><a href="{pre}can/{r["platform"]}/{r["model_slug"]}/index.html">{esc(r["model"])}</a>{" <span class=tag>VLM</span>" if r["model_type"]=="vlm" else ""}</td>')
         h.append(f'<td class="n" data-label="Size" data-v="{params_of(r) if params_of(r) is not None else -1}">{size_txt(r)}</td>')
         h.append(f'<td class="hide-sm" data-label="Quant"><code>{esc(r["quant"])}</code></td><td data-label="Runtime">{rt_html(r["runtime"])}</td>')
         h.append(f'<td class="n gen" data-label="Gen tok/s" data-v="{r["gen_tps"]}"><span class="num">{fmt(r["gen_tps"])}</span><span class="barwrap" aria-hidden="true"><span class="bar" style="width:{w}%"></span></span></td>')
         h.append(f'<td class="n hide-sm" data-label="Prompt tok/s" data-v="{r["prompt_tps"] or -1}">{r["prompt_tps"] or "–"}</td><td class="n hide-sm" data-label="TTFT ms" data-v="{r["ttft_ms"] or -1}">{r["ttft_ms"] or "–"}</td>')
-        h.append(f'<td data-label="Source">{src_link(r,pre)}<div class="sub">{"" if r["date_type"]=="published" else esc(r["date_type"].split(" ")[0])+" "}{esc(r["source_date"])}</div></td></tr>')
+        h.append(f'<td data-label="Source"><span class="evidence-label">{esc(source_label(r))}</span>{src_link(r,pre)}<div class="sub">{"" if r["date_type"]=="published" else esc(r["date_type"].split(" ")[0])+" "}{esc(r["source_date"])}</div><details class="run-details"><summary>Run conditions</summary><p><b>Hardware:</b> {esc(r["board"])} · {esc(r["accelerator"])}</p><p><b>Source notes:</b> {esc(r["notes"]) if r["notes"].strip() else "No additional conditions recorded; open the source."}</p><p>Transcribed from the linked source; not independently reproduced by EdgeTokens.</p></details></td></tr>')
     h.append('</tbody></table></div>')
     return ''.join(h)
 
@@ -301,7 +304,7 @@ for best,p in best_by_p:
     rs = byp[p]; models = len(set(r['model_slug'] for r in rs))
     cards.append(f'<a class="card" href="{p}/index.html"><p class="t-eyebrow">{from_price(p)}</p><h3>{esc(P[p][1])}</h3><p>{esc(P[p][2])}</p><div class="meta"><span class="cbest"><b>{fmt(best)}</b> tok/s best</span><span><b>{len(rs)}</b> runs</span><span><b>{models}</b> models</span></div></a>')
 write('boards/index.html', page(f'All boards | {SITE}','Every edge AI board in the EdgeTokens dataset.',
-    '<section class="pagehead"><p class="eyebrow">Boards</p><h1 class="display">Every board. <span class="mute">Every run.</span></h1><p class="lede">Pick a board to see every measured model run, current prices and sources. Sorted by fastest measured run.</p></section><div class="cards reveal">'+''.join(cards)+'</div>','boards/',1,'boards')); urls.append('boards/')
+    '<section class="pagehead"><p class="eyebrow">Boards</p><h1 class="display">Every board. <span class="mute">Every run.</span></h1><p class="lede">Pick a board to see every measured model run, current prices and sources. Sorted by fastest reported run.</p></section><div class="cards reveal">'+''.join(cards)+'</div>','boards/',1,'boards')); urls.append('boards/')
 
 def uniq(xs):
     out = []
@@ -437,7 +440,7 @@ for p,rs in byp.items():
     body = f'''<nav class="crumb" aria-label="Breadcrumb"><a href="../index.html">Boards</a> <span aria-hidden="true">›</span> <span>{esc(SHORT[p])}</span></nav>
 <section class="product"><div class="glow" aria-hidden="true"></div>
 <h1 class="display">{esc(P[p][1])}</h1><p class="lede">{esc(P[p][2])}</p>
-<div class="bignum"><p class="hs-label">Fastest measured run</p><p class="hs-num"><span class="grad">{fmt(best["gen_tps"])}</span><span class="hs-unit">tok/s</span></p>
+<div class="bignum"><p class="hs-label">Fastest reported run</p><p class="hs-num"><span class="grad">{fmt(best["gen_tps"])}</span><span class="hs-unit">tok/s</span></p>
 <p class="cap">{esc(best["model"])} · <code>{esc(best["quant"])}</code> · {esc(best["runtime"])} · {src_link(best,"../../")}</p></div>
 {hero_buy}</section>
 <dl class="specs reveal">{spec_html}</dl>
@@ -502,23 +505,25 @@ hero = f'''<section class="hero"><p class="eyebrow">Open edge-AI benchmark datab
 <p class="lede">Measured tokens per second on the Raspberry Pi, Jetson, Rockchip, Hailo and Axera boards makers actually buy. No estimates, no marketing math. Each result links to the public post, paper or log it came from.</p>
 <div class="ctas"><a class="pill primary" href="#leaderboard">Explore the leaderboard</a><a class="pill ghost" href="pick/index.html">Which board should I buy? <span aria-hidden="true">›</span></a></div>
 <figure class="herostat"><div class="glow" aria-hidden="true"></div>
-<p class="hs-label">Fastest measured run in the database</p>
+<p class="hs-label">Fastest reported run in the database</p>
 <p class="hs-num"><span class="grad">{fmt(top["gen_tps"])}</span><span class="hs-unit">tok/s</span></p>
 <figcaption>{esc(top["model"])} on {esc(SHORT[top["platform"]])} · {esc(top["runtime"].split(" (")[0])} · {src_link(top,"")}</figcaption>
-<ul class="trio" aria-label="Fastest measured run on popular boards">{trio}</ul></figure>
+<p class="cap">Highest single reported result, not typical performance or a controlled cross-board comparison.</p><ul class="trio" aria-label="Fastest reported run on popular boards">{trio}</ul></figure>
 <dl class="stats"><div><dt>Measured runs</dt><dd>{len(B)}</dd></div><div><dt>Boards &amp; configs</dt><dd>{nb}</dd></div><div><dt>Models</dt><dd>{nm}</dd></div><div><dt>Public sources</dt><dd>{ns}</dd></div></dl></section>'''
 vm = VALUE_MODELS[0]; vtop = best_value(vm)[0]
 tiles = f'''<section class="section reveal" aria-labelledby="explore-h"><h2 class="display2" id="explore-h">Find the right board. <span class="mute">Without the guesswork.</span></h2>
 <div class="tiles">
-<a class="tile" href="pick/index.html"><p class="t-eyebrow">Board picker</p><h3>Which board should I buy?</h3><p>Set a budget and a model size. Get boards ranked by their fastest measured run.</p><span class="more">Open the picker <span aria-hidden="true">›</span></span></a>
+<a class="tile" href="pick/index.html"><p class="t-eyebrow">Board picker</p><h3>Which board should I buy?</h3><p>Set a budget and a model size. Get boards ranked by their fastest reported run.</p><span class="more">Open the picker <span aria-hidden="true">›</span></span></a>
 <a class="tile" href="value/index.html"><p class="t-eyebrow">Best value</p><h3>Most speed per dollar.</h3><p>On {esc(MODEL_NAME[vm])}, the {esc(SHORT[vtop[1]["platform"]])} leads with <b class="gradtext">{vtop[0]:.2f}</b> tok/s per $100.</p><span class="more">See the ranking <span aria-hidden="true">›</span></span></a>
 <a class="tile" href="boards/index.html"><p class="t-eyebrow">Boards</p><h3>{nb} boards &amp; configs.</h3><p>Every run, listed price and source for each board, from a Pi 5 to Jetson Thor.</p><span class="more">Browse boards <span aria-hidden="true">›</span></span></a>
 </div></section>'''
 controls = f'''<section class="section controls reveal" id="leaderboard" aria-labelledby="lb-h"><div class="ctl-head"><h2 class="display2" id="lb-h">The leaderboard.</h2><p class="sub" id="count" aria-live="polite">{len(B)} runs</p></div>
-<div class="filters"><label class="f-q"><span class="vh">Search</span><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="q" type="search" placeholder="Search boards, models, runtimes" aria-label="Search board, model, runtime"></label>
+<p class="hint">Compare the same model and quantization first. Source labels describe who published a run, not a certification. EdgeTokens has not independently reproduced these results.</p><div class="filters"><label class="f-q"><span class="vh">Search</span><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input id="q" type="search" placeholder="Search boards, models, runtimes" aria-label="Search board, model, runtime"></label>
 <label><span class="vh">Board</span><select id="f-board" aria-label="Board"><option value="">All boards</option>{bopts}</select></label>
 <label><span class="vh">Model size</span><select id="f-size" aria-label="Model size"><option value="">Any size</option>{sopts}</select></label>
 <label><span class="vh">Runtime</span><select id="f-rt" aria-label="Runtime"><option value="">Any runtime</option>{ropts}</select></label>
+<label><span class="vh">Exact model</span><select id="f-model" aria-label="Exact model"><option value="">Any model</option>{''.join(f'<option value="{esc(m)}">{esc(MODEL_NAME[m])}</option>' for m in sorted(MODEL_NAME, key=lambda m: MODEL_NAME[m].lower()))}</select></label>
+<label class="f-source"><span class="vh">Source type</span><select id="f-source" aria-label="Source type"><option value="">All source types</option>{''.join(f'<option value="{k}">{v}</option>' for k,v in SOURCE_LABELS.items())}</select></label>
 <button class="pill ghost sm" type="button" id="clear">Reset</button></div>'''
 note = '<div class="more-row"><button class="pill ghost" type="button" id="showall" hidden>Show all runs</button></div><p class="hint">Tap a column header to sort. <b>Gen tok/s</b> is generation (decode) speed. Sources use different prompts, runtimes and settings, so open the source before comparing two rows.</p></section>'
 write('index.html', page(f'{SITE}: AI speed leaderboard for Raspberry Pi, Jetson, RK3588 & edge boards',
@@ -771,7 +776,7 @@ for (p,m),rs in bypm.items():
 opts = ''.join(f'<option value="{p}">{esc(P[p][1])}</option>' for p in P) + '<option value="other">Other board (tell us below)</option>'
 submit = f'''<section class="pagehead"><p class="eyebrow">Submit a run</p><h1 class="display">Share your <span class="grad">numbers.</span></h1><p class="lede">Ran a model on a small board? Send the numbers and a link to the log or post. We check every submission before it goes live and never publish a run without a source.</p></section>
 <form class="sub-form" id="submit-form" onsubmit="return etSubmit(this)">
-<p id="sub-ok" class="verdict yes" hidden>Almost done! We opened a pre-filled GitHub issue in a new tab. Click "Create" there to send your run. (No GitHub account? Email the same details to the newsletter address.)</p>
+<p id="sub-ok" class="verdict yes" hidden>Almost done! We opened a pre-filled GitHub issue in a new tab. Click "Create" there to send your run. (A GitHub account is required to submit. Details entered here are included in a public issue; do not include private information.)</p>
 <label>Board<select name="board" required>{opts}</select></label>
 <label>Accelerator / where it ran<input name="accelerator" placeholder="CPU, NPU, GPU, Hailo-10H…" required></label>
 <label>Runtime + version<input name="runtime" placeholder="llama.cpp b6xxx, Ollama 0.x, RKLLM 1.3.1, MLC…" required></label>
@@ -780,7 +785,7 @@ submit = f'''<section class="pagehead"><p class="eyebrow">Submit a run</p><h1 cl
 <div class="row"><label>Generation tok/s<input name="gen" type="number" step="0.01" required></label><label>Prompt tok/s (optional)<input name="pp" type="number" step="0.01"></label><label>TTFT ms (optional)<input name="ttft" type="number" step="1"></label></div>
 <label>Source link (log, gist, post, video)<input name="url" type="url" required placeholder="https://"></label>
 <label>Notes (power mode, cooling, context length…)<textarea name="notes" rows="3"></textarea></label>
-<label>Email (optional, only to ask about your run)<input name="email" type="email"></label>
+<label>Contact email (optional; will be public in the GitHub issue)<input name="email" type="email"></label>
 <button class="pill primary">Submit run</button></form>
 <script>function etSubmit(f){{var d=new FormData(f),b=f.board.options[f.board.selectedIndex].text,L=[];
 [['Board',b],['Accelerator',d.get('accelerator')],['Runtime + version',d.get('runtime')],['Model',d.get('model')],['Quantization',d.get('quant')],['Generation tok/s',d.get('gen')],['Prompt tok/s',d.get('pp')],['TTFT ms',d.get('ttft')],['Source',d.get('url')],['Notes',d.get('notes')],['Contact email',d.get('email')]].forEach(function(r){{if(r[1])L.push('**'+r[0]+':** '+r[1]);}});
@@ -792,7 +797,7 @@ write('submit/index.html', page(f'Submit a benchmark | {SITE}','Send us your edg
 about = '''<section class="pagehead"><p class="eyebrow">Methodology</p><h1 class="display">How we <span class="grad">check.</span></h1></section><ul class="prose"><li><b>We only publish numbers someone actually measured</b> and published: vendor benchmark pages, papers, reviews, GitHub issues and community posts. Every row links to its source.</li>
 <li><b>We don't estimate or extrapolate.</b> If a source gives a range or a "~", we record what it says and keep its wording in the notes.</li>
 <li><b>Dates:</b> "published" means the source's publish date, "commit" a git commit date, "tested" the test date in the post, "accessed" when no date was shown (the date we read it).</li>
-<li><b>Comparisons are approximate.</b> Prompt length, context, runtime version, power mode and cooling differ between sources.</li>
+<li><b>Source labels are provenance, not verification.</b> Vendor reported, academic paper, independent publication and community reported describe the publisher recorded in the dataset. EdgeTokens transcribes these reports and has not independently reproduced the runs.</li><li><b>Fastest is not typical.</b> Headline speeds and buyer rankings use the highest single reported result in the relevant group. A range spans different setups, not repeated trials under one protocol; no typical speed is inferred.</li><li><b>Comparisons are approximate.</b> Prompt length, context, runtime version, power mode and cooling differ between sources.</li>
 <li><b>Tokens per dollar:</b> the <a href="../value/index.html">value ranking</a> and <a href="../pick/index.html">board picker</a> divide a sourced speed by a sourced listed price. That is arithmetic on two sourced numbers, and every row links to both sources. Prices exclude PSU, storage, cooling and shipping.</li>
 <li><b>Affiliate links:</b> some buy links may earn us a commission. They never change the numbers.</li></ul>'''
 write('about/index.html', page(f'Methodology | {SITE}','How EdgeTokens collects and checks benchmark numbers.', about,'about/',1)); urls.append('about/')
